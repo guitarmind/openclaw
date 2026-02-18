@@ -61,6 +61,11 @@ RUN set -eux; \
 # build gogcli
 RUN git clone https://github.com/steipete/gogcli.git /tmp/gogcli \
    && cd /tmp/gogcli \
+   && if [ -n "${GOGCLI_REF}" ]; then \
+        git checkout "${GOGCLI_REF}"; \
+      else \
+        git checkout "$(git describe --tags --abbrev=0)"; \
+      fi \
    && make \
    && cp ./bin/gog /usr/local/bin/gog \
    && rm -rf /tmp/gogcli
