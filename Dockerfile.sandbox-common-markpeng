@@ -13,7 +13,6 @@ ARG INSTALL_BREW=1
 ARG BREW_INSTALL_DIR=/home/linuxbrew/.linuxbrew
 ARG FINAL_USER=sandbox
 ARG GO_VERSION=1.24.0
-ARG GOGCLI_REF=
 
 ENV BUN_INSTALL=${BUN_INSTALL_DIR}
 ENV HOMEBREW_PREFIX=${BREW_INSTALL_DIR}
@@ -59,7 +58,7 @@ RUN set -eux; \
   rm -f /tmp/go.tgz; \
   go version
 
-# build gogcli (prefer latest stable tag; allow explicit override via GOGCLI_REF)
+# build gogcli
 RUN git clone https://github.com/steipete/gogcli.git /tmp/gogcli \
    && cd /tmp/gogcli \
    && if [ -n "${GOGCLI_REF}" ]; then \
