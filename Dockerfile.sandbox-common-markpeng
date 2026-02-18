@@ -5,13 +5,14 @@ USER root
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG PACKAGES="curl wget jq coreutils grep nodejs npm python3 python-is-python3 git ca-certificates golang-go rustc cargo unzip pkg-config libasound2-dev build-essential file"
+ARG PACKAGES="curl wget jq coreutils grep nodejs npm python3 python-is-python3 git ca-certificates rustc cargo unzip pkg-config libasound2-dev build-essential file"
 ARG INSTALL_PNPM=1
 ARG INSTALL_BUN=1
 ARG BUN_INSTALL_DIR=/opt/bun
 ARG INSTALL_BREW=1
 ARG BREW_INSTALL_DIR=/home/linuxbrew/.linuxbrew
 ARG FINAL_USER=sandbox
+ARG GO_VERSION=1.24.0
 
 ENV BUN_INSTALL=${BUN_INSTALL_DIR}
 ENV HOMEBREW_PREFIX=${BREW_INSTALL_DIR}
@@ -40,6 +41,23 @@ RUN if [ "${INSTALL_BREW}" = "1" ]; then \
   ln -sf "${BREW_INSTALL_DIR}/bin/brew" /usr/local/bin/brew; \
 fi
 
+# Install a modern Go toolchain because Debian bookworm's `golang-go` parser rejects
+# patch-form go directives used by upstream gogcli (for example `go 1.24.0`).
+RUN set -eux; \
+  arch="$(dpkg --print-architecture)"; \
+  case "${arch}" in \
+    amd64) go_arch='amd64' ;; \
+    arm64) go_arch='arm64' ;; \
+    *) echo "unsupported architecture: ${arch}" >&2; exit 1 ;; \
+  esac; \
+  curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${go_arch}.tar.gz" -o /tmp/go.tgz; \
+  rm -rf /usr/local/go; \
+  tar -C /usr/local -xzf /tmp/go.tgz; \
+  ln -sf /usr/local/go/bin/go /usr/local/bin/go; \
+  ln -sf /usr/local/go/bin/gofmt /usr/local/bin/gofmt; \
+  rm -f /tmp/go.tgz; \
+  go version
+
 # build gogcli
 RUN git clone https://github.com/steipete/gogcli.git /tmp/gogcli \
    && cd /tmp/gogcli \
@@ -49,4 +67,3 @@ RUN git clone https://github.com/steipete/gogcli.git /tmp/gogcli \
 
 # Default is sandbox, but allow BASE_IMAGE overrides to select another final user.
 USER ${FINAL_USER}
-
