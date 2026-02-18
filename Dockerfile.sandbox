@@ -10,6 +10,7 @@ RUN apt-get update \
     git \
     jq \
     python3 \
+    python-is-python3 \
     ripgrep \
   && rm -rf /var/lib/apt/lists/*
 

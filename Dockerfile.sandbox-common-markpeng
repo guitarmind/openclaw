@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=openclaw-sandbox:bookworm-slim
+ARG BASE_IMAGE=openclaw-sandbox-common:bookworm-slim
 FROM ${BASE_IMAGE}
 
 USER root
@@ -39,6 +39,13 @@ RUN if [ "${INSTALL_BREW}" = "1" ]; then \
   if [ ! -x "${BREW_INSTALL_DIR}/bin/brew" ]; then echo \"brew install failed\"; exit 1; fi; \
   ln -sf "${BREW_INSTALL_DIR}/bin/brew" /usr/local/bin/brew; \
 fi
+
+# build gogcli
+RUN git clone https://github.com/steipete/gogcli.git /tmp/gogcli \
+   && cd /tmp/gogcli \
+   && make \
+   && cp ./bin/gog /usr/local/bin/gog \
+   && rm -rf /tmp/gogcli
 
 # Default is sandbox, but allow BASE_IMAGE overrides to select another final user.
 USER ${FINAL_USER}
