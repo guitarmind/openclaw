@@ -26,16 +26,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends ${PACKAGES} \
   && rm -rf /var/lib/apt/lists/*
 
-RUN set -eux; \
-  curl -LsSf https://astral.sh/uv/install.sh | sh; \
-  if [ -x "${UV_INSTALL_DIR}/bin/uv" ]; then \
-    ln -sf "${UV_INSTALL_DIR}/bin/uv" /usr/local/bin/uv; \
-  elif [ -x /root/.local/bin/uv ]; then \
-    ln -sf /root/.local/bin/uv /usr/local/bin/uv; \
-  else \
-    echo "uv install failed" >&2; exit 1; \
-  fi; \
-  uv --version
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 RUN uv venv /opt/venv \
   && uv pip install --python /opt/venv/bin/python requests
