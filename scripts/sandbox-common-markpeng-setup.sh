@@ -3,13 +3,14 @@ set -euo pipefail
 
 BASE_IMAGE="${BASE_IMAGE:-openclaw-sandbox:bookworm-slim}"
 TARGET_IMAGE="${TARGET_IMAGE:-openclaw-sandbox-common-markpeng:bookworm-slim}"
-PACKAGES="${PACKAGES:-curl wget jq coreutils grep nodejs npm python3 python-is-python3 git ca-certificates golang-go rustc cargo unzip pkg-config libasound2-dev build-essential file}"
+PACKAGES="${PACKAGES:-curl wget jq coreutils grep nodejs npm python3 python3-pip python3-venv python-is-python3 git ca-certificates golang-go rustc cargo unzip pkg-config libasound2-dev build-essential file}"
 INSTALL_PNPM="${INSTALL_PNPM:-1}"
 INSTALL_BUN="${INSTALL_BUN:-1}"
 BUN_INSTALL_DIR="${BUN_INSTALL_DIR:-/opt/bun}"
 INSTALL_BREW="${INSTALL_BREW:-1}"
 BREW_INSTALL_DIR="${BREW_INSTALL_DIR:-/home/linuxbrew/.linuxbrew}"
 FINAL_USER="${FINAL_USER:-sandbox}"
+UV_INSTALL_DIR="${UV_INSTALL_DIR:-/opt/uv}"
 
 if ! docker image inspect "${BASE_IMAGE}" >/dev/null 2>&1; then
   echo "Base image missing: ${BASE_IMAGE}"
@@ -30,6 +31,7 @@ docker build \
   --build-arg INSTALL_BREW="${INSTALL_BREW}" \
   --build-arg BREW_INSTALL_DIR="${BREW_INSTALL_DIR}" \
   --build-arg FINAL_USER="${FINAL_USER}" \
+  --build-arg UV_INSTALL_DIR="${UV_INSTALL_DIR}" \
   .
 
 cat <<NOTE
