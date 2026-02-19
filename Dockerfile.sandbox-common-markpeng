@@ -20,7 +20,7 @@ ENV HOMEBREW_PREFIX=${BREW_INSTALL_DIR}
 ENV HOMEBREW_CELLAR=${BREW_INSTALL_DIR}/Cellar
 ENV HOMEBREW_REPOSITORY=${BREW_INSTALL_DIR}/Homebrew
 ENV UV_INSTALL_DIR=${UV_INSTALL_DIR}
-ENV PATH=/opt/venv/bin:${UV_INSTALL_DIR}/bin:${BUN_INSTALL_DIR}/bin:${BREW_INSTALL_DIR}/bin:${BREW_INSTALL_DIR}/sbin:${PATH}
+ENV PATH=/opt/venv/bin:${UV_INSTALL_DIR}:${UV_INSTALL_DIR}/bin:${BUN_INSTALL_DIR}/bin:${BREW_INSTALL_DIR}/bin:${BREW_INSTALL_DIR}/sbin:${PATH}
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends ${PACKAGES} \
@@ -28,14 +28,18 @@ RUN apt-get update \
 
 RUN set -eux; \
   curl -LsSf https://astral.sh/uv/install.sh | sh; \
-  if [ -x "${UV_INSTALL_DIR}/bin/uv" ]; then \
+  if [ -x "${UV_INSTALL_DIR}/uv" ]; then \
+    ln -sf "${UV_INSTALL_DIR}/uv" /usr/local/bin/uv; \
+  elif [ -x "${UV_INSTALL_DIR}/bin/uv" ]; then \
     ln -sf "${UV_INSTALL_DIR}/bin/uv" /usr/local/bin/uv; \
   elif [ -x /root/.local/bin/uv ]; then \
     ln -sf /root/.local/bin/uv /usr/local/bin/uv; \
   else \
-    echo "uv install failed" >&2; exit 1; \
+    echo "uv install failed" >&2; \
+    ls -la "${UV_INSTALL_DIR}" || true; \
+    exit 1; \
   fi; \
-  uv --version
+  /usr/local/bin/uv --version
 
 RUN /usr/local/bin/uv venv /opt/venv \
   && /usr/local/bin/uv pip install --python /opt/venv/bin/python requests
