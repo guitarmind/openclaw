@@ -45,6 +45,9 @@ RUN /usr/local/bin/uv venv /opt/venv \
   && /usr/local/bin/uv pip install --python /opt/venv/bin/python requests \
   && chown -R ${FINAL_USER}:${FINAL_USER} /opt/venv
 
+# The sandbox runtime can mount the root filesystem read-only. Mark /opt/venv as
+# a Docker volume so it stays writable for runtime uv installs.
+VOLUME ["/opt/venv"]
 
 RUN if [ "${INSTALL_PNPM}" = "1" ]; then npm install -g pnpm; fi
 
