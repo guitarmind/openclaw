@@ -42,7 +42,8 @@ RUN set -eux; \
   /usr/local/bin/uv --version
 
 RUN /usr/local/bin/uv venv /opt/venv \
-  && /usr/local/bin/uv pip install --python /opt/venv/bin/python requests
+  && /usr/local/bin/uv pip install --python /opt/venv/bin/python requests \
+  && chown -R ${FINAL_USER}:${FINAL_USER} /opt/venv
 
 
 RUN if [ "${INSTALL_PNPM}" = "1" ]; then npm install -g pnpm; fi
